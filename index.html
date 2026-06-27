@@ -285,6 +285,16 @@ window.addEventListener('pointerup', function () { dragging = false; });
 document.getElementById('randomBtn').addEventListener('click', function () {
   padEls[Math.floor(Math.random() * padEls.length)].click();
 });
+
+// ponytail: deep-link via hash, e.g. #angelo
+function playFromHash() {
+  var h = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+  if (!h) return;
+  var idx = SOUNDS.findIndex(function (s) { return s.name.toLowerCase() === h; });
+  if (idx >= 0) padEls[idx].click();
+}
+playFromHash();
+window.addEventListener('hashchange', playFromHash);
 </script>
 
 </body>
