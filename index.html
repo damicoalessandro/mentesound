@@ -18,10 +18,16 @@ body {
   overflow-x: hidden;
 }
 
-.logo {
-  width: clamp(100px, 30vw, 160px);
-  margin: 24px 0 8px;
+h1 {
+  font-family: 'Lilita One', cursive;
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  color: #ff3f04;
+  margin: 32px 0 8px;
+  letter-spacing: .02em;
+  text-align: center;
+  display: flex; align-items: center; gap: 12px;
 }
+.logo { height: 1.2em; }
 
 .grid {
   display: grid;
@@ -147,7 +153,7 @@ body {
 </head>
 <body>
 
-<img src="logo.png" alt="Mentelocale 3.0" class="logo">
+<h1><img src="logo.png" alt="" class="logo">MENTESOUND</h1>
 
 <div class="grid" id="grid"></div>
 
