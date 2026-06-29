@@ -91,6 +91,25 @@ h1 {
 .pad-link:hover { color: #fff; }
 .pad-link.copied { color: #ff3f04; }
 
+/* ponytail: focus mode — deep link shows one big pad to tap */
+.focus-hint, .focus-all { display: none; }
+body.focus .filter-toggle, body.focus #randomBtn { display: none; }
+body.focus .focus-hint {
+  display: block; text-align: center;
+  color: rgba(255, 255, 255, .65); font-size: 16px; font-weight: 700;
+  margin: 12px 0 4px;
+}
+body.focus .focus-all {
+  display: inline-block; margin: 4px 0 28px;
+  color: rgba(255, 255, 255, .4); font-size: 14px; text-decoration: none;
+}
+body.focus .focus-all:hover { color: #fff; }
+body.focus .grid { grid-template-columns: 1fr; max-width: 280px; }
+body.focus .pad:not(.solo) { display: none !important; }
+body.focus .solo .pad-icon { font-size: 96px; }
+body.focus .solo .pad-label { font-size: 20px; }
+body.focus .solo .pad-link { display: none; }
+
 .pad.active-pad { border-color: #ff3f04; }
 .pad.active-pad::after {
   content: '';
@@ -235,7 +254,11 @@ h1 {
   Filtro Bestemmie
 </label>
 
+<p class="focus-hint">👆 Tocca il pad per ascoltare</p>
+
 <div class="grid" id="grid"></div>
+
+<a class="focus-all" href="#" id="focusAll">← Tutti i suoni</a>
 
 <div class="player-bar">
   <div class="player" id="player">
@@ -381,13 +404,24 @@ function applyFilter() {
   }
 }
 
-// ponytail: deep-link via hash, e.g. #angelo
+// ponytail: deep-link via hash, e.g. #angelo — autoplay is blocked, so show one
+// big pad to tap instead of trying to play on load
 function playFromHash() {
   var h = decodeURIComponent(location.hash.slice(1)).toLowerCase();
-  if (!h) return;
-  var idx = SOUNDS.findIndex(function (s) { return s.name.toLowerCase() === h; });
-  if (idx >= 0) padEls[idx].click();
+  var idx = h ? SOUNDS.findIndex(function (s) { return s.name.toLowerCase() === h; }) : -1;
+  padEls.forEach(function (p) { p.classList.remove('solo'); });
+  if (idx < 0) { document.body.classList.remove('focus'); return; }
+  padEls[idx].classList.add('solo');
+  padEls[idx].style.display = '';       // override filter if this sound is hidden
+  document.body.classList.add('focus');
 }
+document.getElementById('focusAll').addEventListener('click', function (e) {
+  e.preventDefault();
+  history.replaceState(null, '', location.pathname);
+  document.body.classList.remove('focus');
+  padEls.forEach(function (p) { p.classList.remove('solo'); });
+  applyFilter();
+});
 playFromHash();
 window.addEventListener('hashchange', playFromHash);
 </script>
