@@ -137,7 +137,7 @@ h1 {
 
 .player-track {
   position: relative; width: 100%; height: 6px;
-  background: #161616;
+  background: rgba(255, 255, 255, .15);
   border-radius: 3px; cursor: pointer;
   touch-action: none;
   /* ponytail: 44px touch target on a 6px visual bar */
@@ -202,8 +202,6 @@ h1 {
 
 .player-bar {
   width: 100%; max-width: 420px;
-  background: rgba(22, 22, 22, .85);
-  border: 1px solid rgba(255, 255, 255, .08);
   border-radius: 14px;
   padding: 10px 14px;
   margin-bottom: 6px;
@@ -267,6 +265,7 @@ var SOUNDS = [
   { name: 'Alcol-l-l',    icon: '🎤', src: 'audio/jeko-4.ogg'     },
   { name: 'Gorzo',        icon: '🦍', src: 'audio/gorzo-1.ogg',    nsfw: true },
   { name: 'Angelo',       icon: '😇', src: 'audio/angelo-1.ogg'   },
+  { name: 'In pista',     icon: '🕺', src: 'audio/inpista-1.ogg'  },
 ];
 
 var grid = document.getElementById('grid');
