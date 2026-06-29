@@ -90,6 +90,7 @@ h1 {
 .pad:hover .pad-link, .pad-link.copied { opacity: 1; }
 .pad-link:hover { color: #fff; }
 .pad-link.copied { color: #ff3f04; }
+.pad-share { left: 36px; }
 
 .pad.active-pad { border-color: #ff3f04; }
 .pad.active-pad::after {
@@ -257,15 +258,15 @@ h1 {
 <script>
 // ponytail: add sounds here — one line each
 var SOUNDS = [
-  { name: 'Spermo',       icon: '💦', src: 'audio/jeko-1.ogg',     nsfw: true },
-  { name: 'Alzheimer',    icon: '📷', src: 'audio/jeko-2.ogg',     nsfw: true },
-  { name: 'Siringa',      icon: '💉', src: 'audio/jeko-3.ogg'     },
-  { name: 'Divertiti',    icon: '🎵', src: 'audio/gskianto-1.ogg' },
-  { name: 'Bastaaa',      icon: '🔊', src: 'audio/gskianto-2.ogg', nsfw: true },
-  { name: 'Alcol-l-l',    icon: '🎤', src: 'audio/jeko-4.ogg'     },
-  { name: 'Gorzo',        icon: '🦍', src: 'audio/gorzo-1.ogg',    nsfw: true },
-  { name: 'Angelo',       icon: '😇', src: 'audio/angelo-1.ogg'   },
-  { name: 'In pista',     icon: '🕺', src: 'audio/inpista-1.ogg'  },
+  { name: 'Spermo',       icon: '💦', src: 'audio/jeko-1.mp3',     nsfw: true },
+  { name: 'Alzheimer',    icon: '📷', src: 'audio/jeko-2.mp3',     nsfw: true },
+  { name: 'Siringa',      icon: '💉', src: 'audio/jeko-3.mp3'     },
+  { name: 'Divertiti',    icon: '🎵', src: 'audio/gskianto-1.mp3' },
+  { name: 'Bastaaa',      icon: '🔊', src: 'audio/gskianto-2.mp3', nsfw: true },
+  { name: 'Alcol-l-l',    icon: '🎤', src: 'audio/jeko-4.mp3'     },
+  { name: 'Gorzo',        icon: '🦍', src: 'audio/gorzo-1.mp3',    nsfw: true },
+  { name: 'Angelo',       icon: '😇', src: 'audio/angelo-1.mp3'   },
+  { name: 'In pista',     icon: '🕺', src: 'audio/inpista-1.mp3'  },
 ];
 
 var grid = document.getElementById('grid');
@@ -276,6 +277,14 @@ var playStopBtn = document.getElementById('playStopBtn');
 var current = null;
 var padEls = [];
 
+// ponytail: feature-detect file sharing (mobile only); hide share btn elsewhere
+var canShareFiles = false;
+try {
+  canShareFiles = !!(navigator.canShare && navigator.canShare({
+    files: [new File([''], 'x.ogg', { type: 'audio/ogg' })]
+  }));
+} catch (e) {}
+
 SOUNDS.forEach(function (s, i) {
   var btn = document.createElement('button');
   btn.className = 'pad';
@@ -283,6 +292,10 @@ SOUNDS.forEach(function (s, i) {
     '<button class="pad-link" aria-label="Copia link" title="Copia link">' +
       '<svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M6.5 9.5a2.5 2.5 0 0 0 3.6.1l2-2a2.5 2.5 0 0 0-3.5-3.6l-1 1 1 1 1-1a1 1 0 0 1 1.5 1.5l-2 2a1 1 0 0 1-1.5 0zM9.5 6.5a2.5 2.5 0 0 0-3.6-.1l-2 2a2.5 2.5 0 0 0 3.5 3.6l1-1-1-1-1 1a1 1 0 0 1-1.5-1.5l2-2a1 1 0 0 1 1.5 0z"/></svg>' +
     '</button>' +
+    (canShareFiles ?
+    '<button class="pad-link pad-share" aria-label="Condividi audio" title="Condividi audio">' +
+      '<svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M8 1L4.5 4.5l1 1L7.3 3.7V10h1.4V3.7l1.8 1.8 1-1zM3 7v6.5C3 14.3 3.7 15 4.5 15h7c.8 0 1.5-.7 1.5-1.5V7h-1.4v6.6H4.4V7z"/></svg>' +
+    '</button>' : '') +
     '<span class="pad-icon">' + s.icon + '</span><span class="pad-label">' + s.name + '</span>';
 
   var link = btn.querySelector('.pad-link');
@@ -292,6 +305,15 @@ SOUNDS.forEach(function (s, i) {
     navigator.clipboard.writeText(url);
     link.classList.add('copied');
     setTimeout(function () { link.classList.remove('copied'); }, 1200);
+  });
+
+  var share = btn.querySelector('.pad-share');
+  if (share) share.addEventListener('click', function (e) {
+    e.stopPropagation();
+    fetch(s.src).then(function (r) { return r.blob(); }).then(function (blob) {
+      var file = new File([blob], s.name + '.mp3', { type: 'audio/mpeg' });
+      navigator.share({ files: [file], title: s.name }).catch(function () {});
+    });
   });
 
   var audio = new Audio(s.src);
