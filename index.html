@@ -281,7 +281,7 @@ var padEls = [];
 var canShareFiles = false;
 try {
   canShareFiles = !!(navigator.canShare && navigator.canShare({
-    files: [new File([''], 'x.ogg', { type: 'audio/ogg' })]
+    files: [new File([''], 'x.mp3', { type: 'audio/mpeg' })]
   }));
 } catch (e) {}
 
