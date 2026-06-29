@@ -112,8 +112,7 @@ h1 {
 
 .player {
   display: flex; align-items: center; gap: 12px;
-  width: 100%; max-width: 420px;
-  padding: 0 20px;
+  width: 100%;
 }
 
 .player-btn {
@@ -169,13 +168,54 @@ h1 {
 .random-btn:active { transform: scale(.92); }
 .random-icon { font-size: 20px; }
 
+.filter-toggle {
+  display: flex; align-items: center; gap: 8px;
+  margin: 0 0 6px;
+  cursor: pointer;
+  font-size: 13px; font-weight: 500;
+  color: rgba(255, 255, 255, .45);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.filter-toggle input { display: none; }
+.filter-toggle .switch {
+  width: 36px; height: 20px;
+  background: #333;
+  border-radius: 10px;
+  position: relative;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.filter-toggle .switch::after {
+  content: '';
+  position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px;
+  background: #888;
+  border-radius: 50%;
+  transition: transform .2s, background .2s;
+}
+.filter-toggle input:checked + .switch { background: #ff3f04; }
+.filter-toggle input:checked + .switch::after {
+  transform: translateX(16px);
+  background: #fff;
+}
+
+.player-bar {
+  width: 100%; max-width: 420px;
+  background: rgba(22, 22, 22, .85);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+}
+
 @media (max-width: 480px) {
   .grid { max-width: 100%; gap: 10px; padding: 12px; }
   .pad { border-radius: 16px; }
   .pad-link { opacity: .5; } /* no hover on touch */
   .pad-icon { font-size: 28px; }
   .pad-label { font-size: 10px; }
-  .player { padding: 0 12px; }
+  .player-bar { padding: 8px 10px; max-width: 100%; }
   h1 { margin: 20px 0 8px; font-size: clamp(2rem, 10vw, 3.2rem); }
   .random-btn { padding: 12px 28px; font-size: 14px; margin: 4px 0 24px; }
 }
@@ -191,15 +231,23 @@ h1 {
 
 <h1><img src="logo.png" alt="" class="logo">MENTE<span style="color:#fff">SOUND</span></h1>
 
+<label class="filter-toggle">
+  <input type="checkbox" id="filterToggle">
+  <span class="switch"></span>
+  Filtro Bestemmie
+</label>
+
 <div class="grid" id="grid"></div>
 
-<div class="player" id="player">
-  <button class="player-btn" id="playStopBtn" aria-label="Stop" disabled>
-    <svg class="icon-play" viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4 2l10 6-10 6z"/></svg>
-    <svg class="icon-stop" viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><rect x="3" y="3" width="10" height="10" rx="1.5"/></svg>
-  </button>
-  <div class="player-track" id="playerTrack">
-    <div class="player-fill" id="playerFill"></div>
+<div class="player-bar">
+  <div class="player" id="player">
+    <button class="player-btn" id="playStopBtn" aria-label="Stop" disabled>
+      <svg class="icon-play" viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M4 2l10 6-10 6z"/></svg>
+      <svg class="icon-stop" viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><rect x="3" y="3" width="10" height="10" rx="1.5"/></svg>
+    </button>
+    <div class="player-track" id="playerTrack">
+      <div class="player-fill" id="playerFill"></div>
+    </div>
   </div>
 </div>
 
@@ -211,13 +259,13 @@ h1 {
 <script>
 // ponytail: add sounds here — one line each
 var SOUNDS = [
-  { name: 'Spermo',       icon: '💦', src: 'audio/jeko-1.ogg'     },
-  { name: 'Alzheimer',    icon: '📷', src: 'audio/jeko-2.ogg'     },
+  { name: 'Spermo',       icon: '💦', src: 'audio/jeko-1.ogg',     nsfw: true },
+  { name: 'Alzheimer',    icon: '📷', src: 'audio/jeko-2.ogg',     nsfw: true },
   { name: 'Siringa',      icon: '💉', src: 'audio/jeko-3.ogg'     },
   { name: 'Divertiti',    icon: '🎵', src: 'audio/gskianto-1.ogg' },
-  { name: 'Bastaaa',      icon: '🔊', src: 'audio/gskianto-2.ogg' },
+  { name: 'Bastaaa',      icon: '🔊', src: 'audio/gskianto-2.ogg', nsfw: true },
   { name: 'Alcol-l-l',    icon: '🎤', src: 'audio/jeko-4.ogg'     },
-  { name: 'Gorzo',        icon: '🦍', src: 'audio/gorzo-1.ogg'    },
+  { name: 'Gorzo',        icon: '🦍', src: 'audio/gorzo-1.ogg',    nsfw: true },
   { name: 'Angelo',       icon: '😇', src: 'audio/angelo-1.ogg'   },
 ];
 
@@ -312,8 +360,27 @@ window.addEventListener('pointermove', function (e) { if (dragging) scrub(e); })
 window.addEventListener('pointerup', function () { dragging = false; });
 
 document.getElementById('randomBtn').addEventListener('click', function () {
-  padEls[Math.floor(Math.random() * padEls.length)].click();
+  var visible = padEls.filter(function (p) { return p.style.display !== 'none'; });
+  if (visible.length) visible[Math.floor(Math.random() * visible.length)].click();
 });
+
+// ponytail: filter persisted in localStorage
+var filterToggle = document.getElementById('filterToggle');
+filterToggle.checked = localStorage.getItem('nsfwFilter') === '1';
+applyFilter();
+filterToggle.addEventListener('change', function () {
+  localStorage.setItem('nsfwFilter', filterToggle.checked ? '1' : '0');
+  applyFilter();
+});
+function applyFilter() {
+  SOUNDS.forEach(function (s, i) {
+    padEls[i].style.display = (filterToggle.checked && s.nsfw) ? 'none' : '';
+  });
+  if (filterToggle.checked && current) {
+    var idx = padEls.findIndex(function (p) { return p._audio === current; });
+    if (idx >= 0 && SOUNDS[idx].nsfw) resetPlayer();
+  }
+}
 
 // ponytail: deep-link via hash, e.g. #angelo
 function playFromHash() {
