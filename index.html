@@ -254,9 +254,9 @@ body.focus .solo .pad-link { display: none; }
   Filtro Bestemmie
 </label>
 
-<p class="focus-hint">👆 Tocca il pad per ascoltare</p>
-
 <div class="grid" id="grid"></div>
+
+<p class="focus-hint">👆 Tocca il pad per ascoltare</p>
 
 <a class="focus-all" href="#" id="focusAll">← Tutti i suoni</a>
 
@@ -325,7 +325,10 @@ SOUNDS.forEach(function (s, i) {
       playerFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
     }
   });
-  audio.addEventListener('ended', function () { resetPlayer(); });
+  audio.addEventListener('ended', function () {
+    resetPlayer();
+    if (document.body.classList.contains('focus')) exitFocus();
+  });
 
   btn.addEventListener('click', function () {
     setActive(audio, btn);
@@ -415,12 +418,15 @@ function playFromHash() {
   padEls[idx].style.display = '';       // override filter if this sound is hidden
   document.body.classList.add('focus');
 }
-document.getElementById('focusAll').addEventListener('click', function (e) {
-  e.preventDefault();
+function exitFocus() {
   history.replaceState(null, '', location.pathname);
   document.body.classList.remove('focus');
   padEls.forEach(function (p) { p.classList.remove('solo'); });
   applyFilter();
+}
+document.getElementById('focusAll').addEventListener('click', function (e) {
+  e.preventDefault();
+  exitFocus();
 });
 playFromHash();
 window.addEventListener('hashchange', playFromHash);
